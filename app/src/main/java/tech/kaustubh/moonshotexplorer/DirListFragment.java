@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 
 /**
@@ -24,6 +26,7 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
     ArrayAdapter <String> dirListAdapter;
     FileSystem fileSystemHandler;
     ArrayList<String> dirList;
+    Stack<ArrayList<String>> dirStack;
 
     public DirListFragment() {
         // Required empty public constructor
@@ -41,25 +44,46 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        fileSystemHandler = new PlainTextFilesystem("mnt/");
-        dirList = new ArrayList<String>(fileSystemHandler.ls("mnt/"));
+        fileSystemHandler = new PlainTextFilesystem("mnt/sdcard/");
+        dirList = new ArrayList<String>(fileSystemHandler.ls("mnt/sdcard/"));
         dirListAdapter = new ArrayAdapter<String>(this.getActivity(),
                 android.R.layout.simple_list_item_1, dirList);
         setListAdapter(dirListAdapter);
         getListView().setOnItemClickListener(this);
+        dirStack = new Stack<ArrayList<String>>();
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        Toast.makeText(this.getActivity(),
-                this.getListView().getItemAtPosition(position).toString(),
-                Toast.LENGTH_SHORT).show();
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+    {
         TextView path = (TextView) view;
         String dir = path.getText().toString();
+        ArrayList <String> tempDirList = new ArrayList<>(100);
+        tempDirList.addAll(dirList);
+
+        dirStack.push(tempDirList);
         dirList.clear();
-        dirListAdapter.clear();
         dirList = fileSystemHandler.ls(dir+"/");
+        dirListAdapter.clear();
+
+        if(dirList == null) {
+            dirList = tempDirList;
+            Toast.makeText(this.getActivity(),
+                    "Directory is Empty",
+                    Toast.LENGTH_SHORT).show();
+        }
+
         dirListAdapter.addAll(dirList);
         dirListAdapter.notifyDataSetChanged();
     }
+
+    public void goBack()
+    {
+        if(dirStack.empty())
+            Toast.makeText(this.getActivity(), "Press Back again to exit.", Toast.LENGTH_SHORT);
+        else
+            fileSystemHandler.ls("..");
+        Log.d("Called", "goBack");
+    }
+
 }

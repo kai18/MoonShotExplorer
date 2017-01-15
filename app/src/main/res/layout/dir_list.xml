@@ -3,5 +3,5 @@
     android:id="@+id/dir_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:textColor="#FFFFFF"
     />

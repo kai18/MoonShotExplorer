@@ -1,7 +1,10 @@
 package tech.kaustubh.moonshotexplorer;
 
+import android.util.Log;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  * Created by kaustubh on 18/12/16.
@@ -9,10 +12,12 @@ import java.util.ArrayList;
 
 public class PlainTextFilesystem implements FileSystem {
 
+    boolean goingBack = false;
     String rootName;
     File root;
     String pwd;
 
+    Stack <String> dirStack;
     public PlainTextFilesystem(String rootName)
     {
         this.rootName = rootName;
@@ -49,20 +54,36 @@ public class PlainTextFilesystem implements FileSystem {
 
     @Override
     public ArrayList<String> ls(String dir) {
-        if(dir != rootName)
+
+        String tempDir = pwd;
+
+        if(dir != rootName && dir != "..")
             pwd = pwd + dir;
+
+        if(dir == "..") {
+            goingBack = true;
+            pwd = dirStack.pop();
+        }
+        if(!goingBack)
+            dirStack.push(pwd);
         File newDir = new File(pwd);
         File directories[] = null;
-        ArrayList <String> directoryNames = null;
-        if(newDir.exists())
-        {
-            if(newDir.isDirectory())
-                directories = newDir.listFiles();
-            if(directories != null)
-                directoryNames = this.getNames(directories);
-        }
 
-        return directoryNames;
+        ArrayList<String> directoryNames = null;
+
+        Log.d("Path: ", pwd);
+
+        if (newDir.exists()) {
+            if (newDir.isDirectory()) {
+                directories = newDir.listFiles();
+                if (directories != null) {
+                    directoryNames = this.getNames(directories);
+                    return directoryNames;
+                }
+            }
+        }
+        pwd = tempDir;
+        return null;
     }
 
     @Override

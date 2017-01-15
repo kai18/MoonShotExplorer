@@ -11,7 +11,7 @@
         android:headerDividersEnabled="true"
         android:footerDividersEnabled="true"
         android:dividerHeight="1dp"
-        android:background="@android:color/white">
+        android:background="#006064">
     </ListView>
 
     <TextView
