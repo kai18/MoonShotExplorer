@@ -10,12 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 
 /**
@@ -23,10 +22,9 @@ import java.util.Stack;
  */
 public class DirListFragment extends ListFragment implements AdapterView.OnItemClickListener {
 
-    ArrayAdapter <String> dirListAdapter;
+    DirListAdapter dirListAdapter;
     FileSystem fileSystemHandler;
     ArrayList<String> dirList;
-    Stack<ArrayList<String>> dirStack;
 
     public DirListFragment() {
         // Required empty public constructor
@@ -46,25 +44,36 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
         super.onActivityCreated(savedInstanceState);
         fileSystemHandler = new PlainTextFilesystem("mnt/sdcard/");
         dirList = new ArrayList<String>(fileSystemHandler.ls("mnt/sdcard/"));
-        dirListAdapter = new ArrayAdapter<String>(this.getActivity(),
-                android.R.layout.simple_list_item_1, dirList);
+        dirListAdapter = new DirListAdapter(this.getActivity(), R.layout.dir_list, dirList);
         setListAdapter(dirListAdapter);
         getListView().setOnItemClickListener(this);
-        dirStack = new Stack<ArrayList<String>>();
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
     {
-        TextView path = (TextView) view;
+        RelativeLayout relativeLayout = (RelativeLayout) view;
+        TextView path = (TextView) relativeLayout.findViewById(R.id.textView8);
         String dir = path.getText().toString();
-        ArrayList <String> tempDirList = new ArrayList<>(100);
-        tempDirList.addAll(dirList);
 
-        dirStack.push(tempDirList);
+        displayDirList(fileSystemHandler.ls(dir+"/"));
+    }
+
+    public void goBack()
+    {
+        Log.d("Going", "Back11");
+        displayDirList(fileSystemHandler.ls(".."));
+        Log.d("Called", "goBack");
+    }
+
+    public void displayDirList(ArrayList<String> list)
+    {
+
+        ArrayList<String> tempDirList = new ArrayList<>(dirList.size());
+        tempDirList.addAll(dirList);
         dirList.clear();
-        dirList = fileSystemHandler.ls(dir+"/");
         dirListAdapter.clear();
+        dirList.addAll(list);
 
         if(dirList == null) {
             dirList = tempDirList;
@@ -75,15 +84,6 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
 
         dirListAdapter.addAll(dirList);
         dirListAdapter.notifyDataSetChanged();
-    }
-
-    public void goBack()
-    {
-        if(dirStack.empty())
-            Toast.makeText(this.getActivity(), "Press Back again to exit.", Toast.LENGTH_SHORT);
-        else
-            fileSystemHandler.ls("..");
-        Log.d("Called", "goBack");
     }
 
 }

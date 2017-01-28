@@ -12,10 +12,6 @@
         android:footerDividersEnabled="true"
         android:dividerHeight="1dp"
         android:background="#006064">
-    </ListView>
 
-    <TextView
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    </ListView>
 </FrameLayout>
