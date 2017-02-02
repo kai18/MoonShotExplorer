@@ -67,7 +67,7 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
 
     public void goBack()
     {
-        Log.d("Going", "Back11");
+        Log.d("Going", "Back1");
         displayDirList(fileSystemHandler.ls(".."));
         Log.d("Called", "goBack");
     }
