@@ -1,31 +1,34 @@
 package tech.kaustubh.moonshotexplorer;
 
+import android.content.Context;
+import android.content.Intent;
+
 import java.util.ArrayList;
 
 /**
  * Created by kaustubh on 18/12/16.
  */
 
-public interface FileSystem {
+interface FileSystem {
 
-    public abstract String getPath(String partialPath);
+    abstract String getPath(String partialPath);
 
-    public abstract String[] cd(String dir);
+    abstract String[] cd(String dir);
 
-    public abstract ArrayList<String> ls(String dir);
+    abstract ArrayList<String> ls(String dir);
 
-    public abstract int mkdir(String path);
+    abstract int mkdir(String path);
 
-    public abstract int opn(String path);
+    abstract Intent opn(String path, Context context);
 
-    public abstract int setRoot(String path);
+    abstract int setRoot(String path);
 
-    public String getRoot(String dir);
+    String getRoot(String dir);
 
-    public abstract String getPwd(String path);
+    abstract String getPwd();
 
-    public abstract void setPwd(String path);
+    abstract void setPwd(String path);
 
-    public abstract int cpy(String source, String destination);
+    abstract int cpy(String source, String destination);
 
 }

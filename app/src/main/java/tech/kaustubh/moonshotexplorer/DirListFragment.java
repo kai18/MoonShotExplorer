@@ -1,6 +1,7 @@
 package tech.kaustubh.moonshotexplorer;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -55,8 +56,13 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
         RelativeLayout relativeLayout = (RelativeLayout) view;
         TextView path = (TextView) relativeLayout.findViewById(R.id.textView8);
         String dir = path.getText().toString();
-
-        displayDirList(fileSystemHandler.ls(dir+"/"));
+        Intent fileIntent = fileSystemHandler.opn(dir, getContext());
+        if(fileIntent != null) {
+            this.startActivity(fileIntent);
+            return;
+        }
+        else
+            displayDirList(fileSystemHandler.ls(dir+"/"));
     }
 
     public void goBack()

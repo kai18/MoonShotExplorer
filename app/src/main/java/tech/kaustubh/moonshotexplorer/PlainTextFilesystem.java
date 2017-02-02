@@ -1,6 +1,10 @@
 package tech.kaustubh.moonshotexplorer;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,8 +99,22 @@ public class PlainTextFilesystem implements FileSystem {
     }
 
     @Override
-    public int opn(String path) {
-        return 0;
+    public Intent opn(String path, Context context)
+    {
+        String filePath = getPwd()+path;
+        File file = new File(filePath);
+        if(file.isFile())
+        {
+            Intent fileIntent = new Intent(Intent.ACTION_VIEW);
+            MimeTypeMap map = MimeTypeMap.getSingleton();
+            String extension = map.getFileExtensionFromUrl(file.getAbsolutePath());
+            String type = map.getMimeTypeFromExtension(extension);
+
+            fileIntent.setDataAndType(FileProvider.getUriForFile(context,
+                    context.getApplicationContext().getPackageName()+".provider", file), type);
+            return  fileIntent;
+        }
+        return null;
     }
 
     @Override
@@ -111,7 +129,7 @@ public class PlainTextFilesystem implements FileSystem {
     }
 
     @Override
-    public String getPwd(String path) {
+    public String getPwd() {
         return pwd;
     }
 
