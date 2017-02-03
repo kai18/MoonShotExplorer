@@ -2,6 +2,7 @@ package tech.kaustubh.moonshotexplorer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -107,11 +108,17 @@ public class PlainTextFilesystem implements FileSystem {
         {
             Intent fileIntent = new Intent(Intent.ACTION_VIEW);
             MimeTypeMap map = MimeTypeMap.getSingleton();
-            String extension = map.getFileExtensionFromUrl(file.getAbsolutePath());
+            String extension = map.getFileExtensionFromUrl(file.getName());
             String type = map.getMimeTypeFromExtension(extension);
 
-            fileIntent.setDataAndType(FileProvider.getUriForFile(context,
-                    context.getApplicationContext().getPackageName()+".provider", file), type);
+            Log.d("Type", type);
+
+            Uri fileUri = FileProvider.getUriForFile(context,
+                    context.getApplicationContext().getPackageName()+".provider", file);
+
+            Log.d("Address", fileUri.toString());
+            fileIntent.setDataAndType(fileUri, type);
+            fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             return  fileIntent;
         }
         return null;
