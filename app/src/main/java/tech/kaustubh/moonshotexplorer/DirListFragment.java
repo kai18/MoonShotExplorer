@@ -3,6 +3,7 @@ package tech.kaustubh.moonshotexplorer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,7 +24,7 @@ import java.util.ArrayList;
  * It uses the Filesystem object to fetch directory contents
  * and display them in a ListView, using the DirListAdapter.
  */
-public class DirListFragment extends ListFragment implements AdapterView.OnItemClickListener {
+public class DirListFragment extends ListFragment implements ListView.OnItemClickListener {
 
     DirListAdapter dirListAdapter;
     FileSystem fileSystemHandler;
@@ -44,11 +46,28 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        fileSystemHandler = new PlainTextFilesystem("mnt/sdcard/");
-        dirList = new ArrayList<>(fileSystemHandler.ls("mnt/sdcard/"));
+        fileSystemHandler = PlainTextFilesystem.getFilesystemHandler();
+        dirList = new ArrayList<>(fileSystemHandler.ls(Environment.getExternalStorageDirectory()
+                .getAbsolutePath()));
         dirListAdapter = new DirListAdapter(this.getActivity(), R.layout.dir_list, dirList);
         setListAdapter(dirListAdapter);
         getListView().setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onPause() {
+        //this.goBack();
+        super.onPause();
+    }
+
+    public FileSystem getFileSystemHandler()
+    {
+        return fileSystemHandler;
     }
 
     @Override
@@ -57,13 +76,16 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
         RelativeLayout relativeLayout = (RelativeLayout) view;
         TextView path = (TextView) relativeLayout.findViewById(R.id.textView8);
         String dir = path.getText().toString();
+        Log.d("Dir", dir);
         Intent fileIntent = fileSystemHandler.opn(dir, getContext());
         if(fileIntent != null) {
             this.startActivity(fileIntent);
             return;
         }
-        else
-            displayDirList(fileSystemHandler.ls(dir+"/"));
+        else {
+            //fileSystemHandler.setPwd("null");
+            displayDirList(fileSystemHandler.ls("/"+dir));
+        }
     }
 
     public void goBack()
@@ -81,16 +103,13 @@ public class DirListFragment extends ListFragment implements AdapterView.OnItemC
         dirList.clear();
         dirListAdapter.clear();
         dirList.addAll(list);
+        dirListAdapter.notifyDataSetChanged();
 
-        if(dirList == null) {
-            dirList = tempDirList;
+        if(list.size() == 0) {
             Toast.makeText(this.getActivity(),
                     "Directory is Empty",
                     Toast.LENGTH_SHORT).show();
         }
-
-        dirListAdapter.addAll(dirList);
-        dirListAdapter.notifyDataSetChanged();
     }
 
 }

@@ -3,6 +3,7 @@ package tech.kaustubh.moonshotexplorer;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,21 +15,26 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     String permissions[] = {Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
-    String storage[] = {"Internal", "External"};
-
+    String storage[] = {Environment.getExternalStorageDirectory().getAbsolutePath()};
     DirListFragment dirListFragment;
     ArrayAdapter<String> drawerAdapter = null;
     DrawerLayout drawerLayout = null;
     ListView drawerList = null;
+    Bundle savedInstanceState = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.savedInstanceState = savedInstanceState;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,6 +69,18 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transactionManager = fragmentManager.beginTransaction();
         transactionManager.add(R.id.activity_main, dirListFragment);
         transactionManager.commit();
+        drawerList.setOnItemClickListener(new DrawerAdaptor(dirListFragment));
+        List<StorageUtils.StorageInfo> list = StorageUtils.getStorageList();
+        for (StorageUtils.StorageInfo indo: list)
+        {
+            Log.d("Storage", indo.getDisplayName());
+
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override

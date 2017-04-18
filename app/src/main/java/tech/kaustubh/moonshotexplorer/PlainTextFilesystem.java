@@ -3,6 +3,7 @@ package tech.kaustubh.moonshotexplorer;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -22,10 +23,10 @@ public class PlainTextFilesystem implements FileSystem {
     private String rootName;
     private File root;
     private String pwd = null;
-
+    private static PlainTextFilesystem plainTextFilesystem = null;
     private Stack <String> dirStack;
 
-    public PlainTextFilesystem(String rootName)
+    private PlainTextFilesystem(String rootName)
     {
         this.rootName = rootName;
         root = new File(rootName);
@@ -33,10 +34,18 @@ public class PlainTextFilesystem implements FileSystem {
         dirStack = new Stack<>();
     }
 
-    public PlainTextFilesystem(File root)
+    public static PlainTextFilesystem getFilesystemHandler()
+    {
+        if(plainTextFilesystem == null)
+            plainTextFilesystem = new PlainTextFilesystem(Environment.getExternalStorageDirectory()
+                    .getAbsolutePath());
+        return plainTextFilesystem;
+    }
+
+    /*public plainTextFilesystem(File root)
     {
      this.root = root;
-    }
+    }*/
 
     @Override
     public String getPath(String partialPath) {
@@ -46,7 +55,6 @@ public class PlainTextFilesystem implements FileSystem {
 
     private ArrayList<String> getNames(File directories[])
     {
-        int index = 0;
         ArrayList<String> directoryNames = new ArrayList (directories.length);
         for (File file: directories)
             directoryNames.add(file.getName());
@@ -57,6 +65,7 @@ public class PlainTextFilesystem implements FileSystem {
 
     @Override
     public String[] cd(String dir) {
+
         return new String[0];
     }
 
@@ -70,12 +79,19 @@ public class PlainTextFilesystem implements FileSystem {
                 pwd = dirStack.peek();
                 Log.d("Popping", dirStack.pop());
             }
+            else
+                Log.d("Stack","Empty");
         }
-        else
+        else if(pwd != null)
             dirStack.push(pwd);
 
-        if(!dir.equals(rootName) && !dir.equals(".."))
+        if(!dir.equals(rootName) && !dir.equals("..") && pwd!=null)
             pwd = pwd + dir;
+        if(dir.equals(rootName))
+            pwd = rootName;
+
+        if (pwd == null)
+            pwd = dir;
 
         Log.d("Going", pwd);
         File pwdDir = new File(pwd);
@@ -102,7 +118,8 @@ public class PlainTextFilesystem implements FileSystem {
     @Override
     public Intent opn(String path, Context context)
     {
-        String filePath = getPwd()+path;
+        String filePath = getPwd()+"/"+path;
+        Log.d("Path", filePath);
         File file = new File(filePath);
         if(file.isFile())
         {
