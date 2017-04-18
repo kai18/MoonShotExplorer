@@ -111,7 +111,7 @@ public class PlainTextFilesystem implements FileSystem {
             String extension = map.getFileExtensionFromUrl(file.getName());
             String type = map.getMimeTypeFromExtension(extension);
 
-            Log.d("Type", type);
+//            Log.d("Type", type);
 
             Uri fileUri = FileProvider.getUriForFile(context,
                     context.getApplicationContext().getPackageName()+".provider", file);
@@ -142,6 +142,7 @@ public class PlainTextFilesystem implements FileSystem {
 
     @Override
     public void setPwd(String path) {
+
         this.pwd = path;
     }
 
